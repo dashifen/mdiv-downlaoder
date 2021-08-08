@@ -1,0 +1,28 @@
+{
+  "name": "dashifen/mdiv-downloader",
+  "description": "A script that pulls data about Canvas classes.",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "David Dashifen Kees",
+      "email": "dashifen@dashifen.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Dashifen\\MDivDownloader\\": "src"
+    }
+  },
+  "require": {
+    "dashifen/debugging": "^1.0",
+    "dashifen/exception": "^1.2",
+    "dashifen/repository": "^3.0",
+    "guzzlehttp/guzzle": "^7.2",
+    "vlucas/phpdotenv": "^5.2"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}
