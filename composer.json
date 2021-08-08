@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Dashifen\\MDivDownloader\\": "src"
+      "Dashifen\\MDiv\\": "src"
     }
   },
   "require": {
