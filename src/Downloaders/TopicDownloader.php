@@ -65,10 +65,23 @@ class TopicDownloader extends AbstractDownloader
     $allTopics = [];
     foreach ($this->getUrls() as $url) {
       $topics = $this->downloader->get($url);
-      array_walk($topics, fn($topic) => new Topic($topic, $this->downloader));
-      $allTopics[] = $topics;
+      
+      // after getting all the topics from $url, we convert the arrays that
+      // the API sends us into Topic objects using array_walk.  then, we merge
+      // them all together into the all topics variable.
+      
+      array_walk($topics, fn(&$topic) => $topic = new Topic($topic));
+      $allTopics = array_merge($allTopics, $topics);
     }
     
+    // the topics we've collected are not ordered chronologically.  honestly,
+    // we're not sure how they're ordered; maybe as the professor added them to
+    // canvas or the order in which they were updated?  either way, it's more
+    // useful if they're ordered chronologically for our purposes.  we can do
+    // a usort here which has the added benefit of giving us an excuse to use
+    // the spaceship operator!
+    
+    usort($allTopics, fn($a, $b) => $a->dueAt <=> $b->dueAt);
     return $allTopics;
   }
   

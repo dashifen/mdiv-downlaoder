@@ -2,20 +2,28 @@
 
 namespace Dashifen\MDiv\Repositories;
 
+use Dashifen\Repository\RepositoryException;
+
 /**
- * @property-read int $id
- * @property-read int $assignmentId
+ * @property-read int    $id
+ * @property-read int    $dueAt
+ * @property-read int    $assignmentId
  * @property-read string $title
+ * @property-read string $message
  */
 class Topic extends AbstractCanvasRepository
 {
   protected int $id;
+  protected int $dueAt;
   protected ?int $assignmentId;
   protected string $title;
+  protected string $message;
   
   public function __construct(array $topic)
   {
-    parent::__construct($this->filter($topic));
+    $filtered = $this->filter($topic);
+    $filtered['dueAt'] = $topic['assignment']['due_at'] ?? null;
+    parent::__construct($filtered);
   }
   
   /**
@@ -47,6 +55,28 @@ class Topic extends AbstractCanvasRepository
   }
   
   /**
+   * setDueAt
+   *
+   * Sets the due at property.
+   *
+   * @param string|null $due
+   *
+   * @return void
+   * @throws RepositoryException
+   */
+  protected function setDueAt(?string $due): void
+  {
+    $ts = $due !== null ? strtotime($due) : 0;
+    
+    if ($ts === false) {
+      throw new RepositoryException('Invalid date: ' . $due,
+        RepositoryException::INVALID_VALUE);
+    }
+    
+    $this->dueAt = $ts;
+  }
+  
+  /**
    * setTitle
    *
    * Sets the title property.
@@ -60,5 +90,17 @@ class Topic extends AbstractCanvasRepository
     $this->title = $title;
   }
   
-  
+  /**
+   * setMessage
+   *
+   * Sets the message property.
+   *
+   * @param string $message
+   *
+   * @return void
+   */
+  protected function setMessage(string $message): void
+  {
+    $this->message = $message;
+  }
 }
