@@ -50,7 +50,7 @@ class TopicDownloader extends AbstractDownloader
    * Gets information about the discussion topics for the specified course and
    * groups within said course.
    *
-   * @return array
+   * @return Topic[]
    * @throws GuzzleException
    * @throws DownloaderException
    * @throws RepositoryException
@@ -70,7 +70,7 @@ class TopicDownloader extends AbstractDownloader
       // the API sends us into Topic objects using array_walk.  then, we merge
       // them all together into the all topics variable.
       
-      array_walk($topics, fn(&$topic) => $topic = new Topic($topic));
+      array_walk($topics, fn(&$topic) => $topic = new Topic($topic, $url));
       $allTopics = array_merge($allTopics, $topics);
     }
     

@@ -7,7 +7,8 @@ use Dashifen\Repository\RepositoryException;
 /**
  * @property-read int    $id
  * @property-read int    $dueAt
- * @property-read int    $assignmentId
+ * @property-read ?int   $courseId
+ * @property-read ?int   $groupId
  * @property-read string $title
  * @property-read string $message
  */
@@ -15,14 +16,22 @@ class Topic extends AbstractCanvasRepository
 {
   protected int $id;
   protected int $dueAt;
-  protected ?int $assignmentId;
-  protected string $title;
+  protected ?int $courseId = null;
+  protected ?int $groupId = null;
   protected string $message;
+  protected string $title;
   
-  public function __construct(array $topic)
+  public function __construct(array $topic, string $url)
   {
     $filtered = $this->filter($topic);
     $filtered['dueAt'] = $topic['assignment']['due_at'] ?? null;
+    
+    // if the $url starts with "course" then we use the number with in it
+    // to set our course ID property.  otherwise, it's a group-based topic and
+    // we set the group ID property.
+    
+    $idIndex = strpos($url, 'course') !== false ? 'courseId' : 'groupId';
+    $filtered[$idIndex] = preg_replace('/\D+/', '', $url);
     parent::__construct($filtered);
   }
   
@@ -41,17 +50,31 @@ class Topic extends AbstractCanvasRepository
   }
   
   /**
-   * setAssignmentId
+   * setCourseId
    *
-   * Sets the assignment ID property.
+   * Sets the course ID property.
    *
-   * @param int|null $assignmentId
+   * @param int|null $courseId
    *
    * @return void
    */
-  protected function setAssignmentId(?int $assignmentId): void
+  protected function setCourseId(?int $courseId): void
   {
-    $this->assignmentId = $assignmentId;
+    $this->courseId = $courseId;
+  }
+  
+  /**
+   * setGroupId
+   *
+   * Sets the group ID property.
+   *
+   * @param int|null $groupId
+   *
+   * @return void
+   */
+  protected function setGroupId(?int $groupId): void
+  {
+    $this->groupId = $groupId;
   }
   
   /**

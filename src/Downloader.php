@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use Dashifen\Debugging\DebuggingTrait;
 use GuzzleHttp\Exception\GuzzleException;
+use Dashifen\MDiv\Repositories\Discussion;
 use Dashifen\Repository\RepositoryException;
 use Dashifen\MDiv\Downloaders\TopicDownloader;
 use Dashifen\MDiv\Downloaders\CourseDownloader;
@@ -79,9 +80,33 @@ class Downloader
     $topicDownloader = new TopicDownloader($this);
     $courseDownloader = new CourseDownloader($this);
     foreach ($courseDownloader->fetch() as $course) {
+      $folder = 'courses/' . $this->sanitize($course->name);
+      
+      if (!is_dir($folder)) {
+        mkdir($folder);
+      }
+
       $topicDownloader->setCourseId($course->id);
       $topicDownloader->setGroups($this->user->getGroups($course->id));
-      $topics = $topicDownloader->fetch();
+      foreach($topicDownloader->fetch() as $topic) {
+        $name = $topic->dueAt !== 0
+          ? date('Ymd', $topic->dueAt) . '-' . $this->sanitize($topic->title)
+          : $this->sanitize($topic->title);
+        
+        $name .= '.json';
+        
+        $url = is_numeric($topic->courseId)
+          ? 'courses/' . $topic->courseId . '/discussion_topics/' . $topic->id . '/view'
+          : 'groups/' . $topic->groupId . '/discussion_topics/' . $topic->id . '/view';
+        
+        $discussion = new Discussion($this->get($url));
+        file_put_contents($folder . '/' . $name,
+          json_encode($discussion, JSON_PRETTY_PRINT));
+      }
+      
+      
+      
+      
       
       
       
@@ -92,6 +117,20 @@ class Downloader
     }
   }
   
+  /**
+   * sanitize
+   *
+   * Converts sets non-word characters to dashes and returns the lower case
+   * versino of the resulting string.
+   *
+   * @param string $unsanitary
+   *
+   * @return string
+   */
+  private function sanitize(string $unsanitary): string
+  {
+    return strtolower(preg_replace('/\W+/', '-', $unsanitary));
+  }
   
   /**
    * get
