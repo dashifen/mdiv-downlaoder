@@ -2,9 +2,11 @@
 
 namespace Dashifen\MDiv\Downloaders;
 
+use Dashifen\MDiv\Repositories\File;
 use Dashifen\MDiv\Repositories\Course;
 use Dashifen\MDiv\DownloaderException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ClientException;
 use Dashifen\Repository\RepositoryException;
 
 class CourseDownloader extends AbstractDownloader
@@ -50,7 +52,17 @@ class CourseDownloader extends AbstractDownloader
   private function getCourses(string $url): array
   {
     $courses = $this->downloader->get($url);
-    array_walk($courses, fn(&$course) => $course = new Course($course));
+    foreach ($courses as &$course) {
+      try {
+        $files = $this->downloader->get('courses/' . $course['id'] . '/files');
+        array_walk($files, fn(&$file) => $file = new File($file));
+      } catch (ClientException $e) {
+        $files = [];
+      }
+      
+      $course = new Course($course, $files);
+    }
+    
     return $courses;
   }
   

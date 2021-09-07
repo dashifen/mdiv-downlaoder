@@ -6,6 +6,8 @@ use Dashifen\Repository\RepositoryException;
 
 class Discussion extends AbstractCanvasRepository
 {
+  protected Topic $topic;
+  
   /**
    * @var Participant[]
    */
@@ -16,10 +18,25 @@ class Discussion extends AbstractCanvasRepository
    */
   protected array $entries;
   
-  public function __construct(array $data = [])
+  public function __construct(Topic $topic, array $data = [])
   {
+    $data['topic'] = $topic;
     $data['entries'] = $data['view'];
     parent::__construct($this->filter($data));
+  }
+  
+  /**
+   * setTopic
+   * 
+   * Sets the topic property.
+   * 
+   * @param Topic $topic
+   *                    
+   * @return void
+   */
+  protected function setTopic(Topic $topic): void
+  {
+    $this->topic = $topic;
   }
   
   /**
@@ -32,7 +49,7 @@ class Discussion extends AbstractCanvasRepository
    * @return void
    * @throws RepositoryException
    */
-  public function setParticipants(array $participants): void
+  protected function setParticipants(array $participants): void
   {
     $this->participants = array_map(fn($p) => new Participant($p), $participants);
   }
@@ -47,7 +64,7 @@ class Discussion extends AbstractCanvasRepository
    * @return void
    * @throws RepositoryException
    */
-  public function setEntries(array $entries): void
+  protected function setEntries(array $entries): void
   {
     $this->entries = array_map(fn($e) => new Entry($e), $entries);
   }

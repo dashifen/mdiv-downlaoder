@@ -8,3 +8,5 @@ use Dashifen\MDiv\Downloader;
 
 $downloader = new Downloader(true);
 $downloader->download();
+
+echo 'done';

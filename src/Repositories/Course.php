@@ -9,6 +9,7 @@ use Dashifen\Repository\RepositoryException;
  *
  * @property-read string $id
  * @property-read string $name
+ * @property-read array  $files;
  *
  * @package Dashifen\MDivDownloader\Repositories
  */
@@ -18,15 +19,23 @@ class Course extends AbstractCanvasRepository
   protected string $name = "";
   
   /**
+   * @var File[]
+   */
+  protected array $files = [];
+  
+  /**
    * Course constructor.
    *
-   * @param array $course
+   * @param array  $course
+   * @param File[] $files
    *
    * @throws RepositoryException
    */
-  public function __construct(array $course)
+  public function __construct(array $course, array $files)
   {
-    parent::__construct($this->filter($course));
+    $filtered = $this->filter($course);
+    $filtered['files'] = $files;
+    parent::__construct($filtered);
   }
   
   /**
@@ -38,7 +47,7 @@ class Course extends AbstractCanvasRepository
    *
    * @return void
    */
-  public function setId(int $id): void
+  protected function setId(int $id): void
   {
     $this->id = $id;
   }
@@ -53,13 +62,27 @@ class Course extends AbstractCanvasRepository
    * @return void
    * @throws RepositoryException
    */
-  public function setName(string $name): void
+  protected function setName(string $name): void
   {
     if (empty($name)) {
       throw new RepositoryException("Course names cannot be empty");
     }
     
     $this->name = $name;
+  }
+  
+  /**
+   * setFiles
+   *
+   * Sets the files property.
+   *
+   * @param File[] $files
+   *
+   * @return void
+   */
+  protected function setFiles(array $files): void
+  {
+    $this->files = $files;
   }
 }
 

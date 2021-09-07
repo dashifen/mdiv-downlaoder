@@ -4,11 +4,11 @@ namespace Dashifen\MDiv\Repositories;
 
 class Entry extends AbstractCanvasRepository
 {
-  protected int $id;
-  protected int $userId;
-  protected int $createdAt;
-  protected ?int $parentId;
-  protected string $message;
+  protected int $id = 0;
+  protected int $userId = 0;
+  protected int $createdAt = 0;
+  protected ?int $parentId = null;
+  protected string $message = '';
   
   /**
    * @var Entry[]
