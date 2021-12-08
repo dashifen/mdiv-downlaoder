@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use Dashifen\Debugging\DebuggingTrait;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ClientException;
 use Dashifen\MDiv\Repositories\Discussion;
 use Dashifen\Repository\RepositoryException;
 use Dashifen\MDiv\Downloaders\TopicDownloader;
@@ -80,8 +81,12 @@ class Downloader
     $topicDownloader = new TopicDownloader($this);
     $courseDownloader = new CourseDownloader($this);
     foreach ($courseDownloader->fetch() as $course) {
-      $folder = 'courses/' . $this->sanitize($course->name);
+      $courseName = $this->sanitize($course->name);
+      if (isset($this->completed[$courseName])) {
+        continue;
+      }
       
+      $folder = 'courses/' . $courseName;
       if (!is_dir($folder)) {
         mkdir($folder);
       }
@@ -104,16 +109,9 @@ class Downloader
           json_encode($discussion, JSON_PRETTY_PRINT));
       }
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      break;
+      $this->completed[$courseName] = date('Y/m/d h:i:s');
+      file_put_contents($this->completed['file'],
+        json_encode($this->completed, JSON_PRETTY_PRINT));
     }
   }
   
@@ -153,13 +151,20 @@ class Downloader
     $url .= strpos($url, '?') === false ? '?' : '&';
     $url .= 'per_page=1000000';
     
-    $response = (new Client())->get(
-      'https://iliff.instructure.com/api/v1/' . $url,
-      [
-        'headers' => $this->headers,
-        'debug'   => false,
-      ]
-    );
+    try {
+      $response = (new Client())->get(
+        'https://iliff.instructure.com/api/v1/' . $url,
+        [
+          'headers' => $this->headers,
+          'debug'   => false,
+        ]
+      );
+    } catch (ClientException $e) {
+      echo $e->getMessage() . PHP_EOL;
+      echo 'https://iliff.instructure.com/api/v1/' . $url . PHP_EOL . PHP_EOL;
+      return [];
+    }
+    
     
     if ($response->getStatusCode() !== 200) {
       throw new DownloaderException($response->getReasonPhrase(),

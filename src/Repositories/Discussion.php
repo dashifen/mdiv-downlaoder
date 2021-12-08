@@ -9,16 +9,16 @@ class Discussion extends AbstractCanvasRepository
   /**
    * @var Participant[]
    */
-  protected array $participants;
+  protected array $participants = [];
   
   /**
    * @var Entry[]
    */
-  protected array $entries;
+  protected array $entries = [];
   
   public function __construct(array $data = [])
   {
-    $data['entries'] = $data['view'];
+    $data['entries'] = $data['view'] ?? [];
     parent::__construct($this->filter($data));
   }
   
